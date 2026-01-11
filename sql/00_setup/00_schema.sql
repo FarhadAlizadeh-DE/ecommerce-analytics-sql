@@ -1,10 +1,13 @@
 -- Raw layer tables expected by staging views
 
-drop view if exists stg_order_items;
-drop view if exists stg_orders;
+-- Reset (idempotent)
+DROP VIEW IF EXISTS fct_orders CASCADE;
+DROP VIEW IF EXISTS stg_order_items CASCADE;
+DROP VIEW IF EXISTS stg_orders CASCADE;
 
-drop table if exists raw_order_items;
-drop table if exists raw_orders;
+DROP TABLE IF EXISTS raw_order_items CASCADE;
+DROP TABLE IF EXISTS raw_orders CASCADE;
+DROP TABLE IF EXISTS raw_products CASCADE;
 
 create table raw_orders (
   order_id     bigint primary key,
