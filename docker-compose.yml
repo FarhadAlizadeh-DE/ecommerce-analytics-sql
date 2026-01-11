@@ -2,16 +2,17 @@ version: "3.9"
 
 services:
   postgres:
-    image: postgres:15
-    container_name: ecom_postgres
-    environment:
-      POSTGRES_DB: ecom_analytics
-      POSTGRES_USER: analytics
-      POSTGRES_PASSWORD: analytics_pw
+    build:
+      context: ./docker
+    container_name: analytics-postgres
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: analytics
+      POSTGRES_USER: analytics_user
+      POSTGRES_PASSWORD: analytics_pass
 
 volumes:
-  postgres_data:
+  pgdata:
