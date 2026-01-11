@@ -26,3 +26,11 @@ insert into raw_order_items (
 (9, 1005, 901, 2, 15.00, 5.00),
 
 (10, 1006, 601, 2, 12.50, 0.00); -- cancelled order (will not count in revenue)
+
+-- Seed products referenced by raw_order_items.product_id
+insert into raw_products (product_id, product_name, category) values
+(501, 'Book A', 'Books'),
+(601, 'Sticker Pack', 'Merch'),
+(701, 'Hammer', 'Tools'),
+(801, 'Headphones', 'Electronics'),
+(901, 'Notebook', 'Books');

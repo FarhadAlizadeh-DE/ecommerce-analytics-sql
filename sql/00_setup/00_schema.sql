@@ -28,3 +28,12 @@ create table raw_order_items (
 create index if not exists idx_raw_orders_ts on raw_orders(order_ts);
 create index if not exists idx_raw_order_items_order_id on raw_order_items(order_id);
 create index if not exists idx_raw_order_items_product_id on raw_order_items(product_id);
+
+-- Raw products (required by dim_products mart)
+create table if not exists raw_products (
+  product_id   bigint primary key,
+  product_name text not null,
+  category     text not null
+);
+
+create index if not exists idx_raw_products_category on raw_products(category);
