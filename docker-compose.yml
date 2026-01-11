@@ -7,12 +7,13 @@ services:
     container_name: analytics-postgres
     ports:
       - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: analytics
       POSTGRES_USER: analytics_user
       POSTGRES_PASSWORD: analytics_pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql:/sql
 
 volumes:
   pgdata:
