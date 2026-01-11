@@ -1,25 +1,23 @@
 begin;
 
--- 1) Read last successful run time
+-- 1) Build a temp table of delta order_ids (new since last run)
+drop table if exists tmp_new_orders;
+create temp table tmp_new_orders as
 with state as (
   select last_run_ts
   from pipeline_state
   where model_name = 'fct_orders_inc'
-),
-
--- 2) Identify new orders since last run (based on order_ts)
-new_orders as (
-  select so.order_id
-  from stg_orders so
-  cross join state s
-  where so.order_ts::timestamptz > s.last_run_ts
 )
+select so.order_id
+from stg_orders so
+cross join state s
+where so.order_ts::timestamptz > s.last_run_ts;
 
--- 3) Delete existing rows for delta order_ids (idempotent)
+-- 2) Delete existing rows for delta order_ids (idempotent)
 delete from fct_orders_inc
-where order_id in (select order_id from new_orders);
+where order_id in (select order_id from tmp_new_orders);
 
--- 4) Insert recomputed rows from the canonical mart view
+-- 3) Insert recomputed rows from the canonical mart view
 insert into fct_orders_inc (
   order_id,
   customer_id,
@@ -38,13 +36,14 @@ select
   order_gross_revenue,
   order_discount_amount
 from fct_orders
-where order_id in (select order_id from new_orders);
+where order_id in (select order_id from tmp_new_orders);
 
--- 5) Advance state to latest processed order_ts in staging
+-- 4) Advance state only if we processed something new
 update pipeline_state
 set last_run_ts = (
-      select coalesce(max(order_ts)::timestamptz, last_run_ts)
-      from stg_orders
+      select coalesce(max(so.order_ts)::timestamptz, last_run_ts)
+      from stg_orders so
+      where so.order_id in (select order_id from tmp_new_orders)
     ),
     updated_at = now()
 where model_name = 'fct_orders_inc';
